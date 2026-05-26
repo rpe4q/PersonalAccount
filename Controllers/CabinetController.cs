@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PersonalAccount.Models.Students;
-using PersonalAccount.Services;
 using PersonalAccount.Utils;
 
 namespace PersonalAccount.Controllers;
