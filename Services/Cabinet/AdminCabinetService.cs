@@ -11,14 +11,15 @@ public class AdminCabinetService(
     ITeacherProfileRepo teacherProfileRepo
 ) : IAdminCabinetService
 {
-    public async Task<List<AccountModel>> GetAllStudentAccountsAsync() =>
-        await accountRepo.GetAllByRoleAsync(AccountRoles.Student);
+    public async Task<List<AccountModel>> GetAllStudentAndTeacherAccountsAsync() =>
+        await accountRepo.GetAllByRoleAsync(AccountRoles.Student | AccountRoles.Teacher);
 
     public async Task<List<GroupModel>> GetAllGroupsAsync() => await groupRepo.GetAllAsync();
 
     public async Task<List<StudentProfileModel>> GetAllStudentProfilesAsync() => await studentProfileRepo.GetAllAsync();
+    public async Task<List<TeacherProfileModel>> GetAllTeacherProfilesAsync() => await teacherProfileRepo.GetAllAsync();
 
-    public async Task AddStudentProfileAsync(string email, string fullName) => 
+    public async Task AddStudentProfileAsync(string email, string fullName) =>
         await AddProfileAsync(studentProfileRepo, email, fullName);
 
     public async Task AddTeacherProfileAsync(string email, string fullName) =>

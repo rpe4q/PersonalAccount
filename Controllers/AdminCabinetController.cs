@@ -19,29 +19,33 @@ public class AdminCabinetController(
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var accounts = (await cabinetService.GetAllStudentAccountsAsync())
-            .ToDictionary(account => account.Id);
-        var profiles = await cabinetService.GetAllStudentProfilesAsync();
+        var accounts = await cabinetService.GetAllStudentAndTeacherAccountsAsync();
+        var accountsDictionary = accounts.ToDictionary(account => account.Id);
+        var studentProfiles = await cabinetService.GetAllStudentProfilesAsync();
+        var teacherProfiles = await cabinetService.GetAllTeacherProfilesAsync();
         var groups = await cabinetService.GetAllGroupsAsync();
         var groupsDictionary = groups.ToDictionary(group => group.Id);
 
         return View(new AdminCabinetViewModel
         {
-            // GroupIdsOrder = groups.OrderBy(group => group.Name).Select(group => group.Id).ToList(),
-            // Groups = groupsDictionary.Select(group => (group.Key, new AdminCabinetGroupViewModel
-            // {
-            //     Name = group.Value.Name,
-            //     ImageUrl = group.Value.ImageUrl?.ToString(),
-            //     Description = group.Value.Description
-            // })).ToDictionary(),
-            // Students = profiles.GroupBy(profile => profile.GroupId)
-            //     .ToDictionary(group => group.Key, group =>
-            //         group.Select(profile => new AdminCabinetStudentViewModel
-            //         {
-            //             Email = accounts[profile.AccountId].Email,
-            //             FullName = profile.FullName,
-            //             PhotoUrl = profile.PhotoUrl?.ToString()
-            //         }).ToList())
+            Teachers = teacherProfiles
+                .OrderBy(teacherProfile => teacherProfile.FullName)
+                .Select(teacherProfile =>
+                    new AdminCabinetTeacherViewModel
+                    {
+                        FullName = teacherProfile.FullName,
+                        Email = accountsDictionary[teacherProfile.AccountId].Email,
+                        PhotoUrl = teacherProfile.PhotoUrl?.ToString()
+                    }).ToList(),
+            Students = studentProfiles.Select(studentProfile => new AdminCabinetStudentViewModel
+                {
+                    FullName = studentProfile.FullName,
+                    Email = accountsDictionary[studentProfile.AccountId].Email,
+                    GroupName = groupsDictionary[studentProfile.GroupId].Name,
+                    PhotoUrl = studentProfile.PhotoUrl?.ToString()
+                }).OrderBy(student => student.GroupName)
+                .ThenBy(student => student.FullName)
+                .ToList(),
         });
     }
 
@@ -83,7 +87,7 @@ public class AdminCabinetController(
     {
         return View(new AddTeacherViewModel());
     }
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddTeacher(AddTeacherViewModel model)
@@ -98,7 +102,7 @@ public class AdminCabinetController(
         }
 
         var password = await accountService.RegisterAsync(model.Email, AccountRoles.Teacher);
-        await cabinetService.AddStudentProfileAsync(model.Email, model.FullName);
+        await cabinetService.AddTeacherProfileAsync(model.Email, model.FullName);
         await emailSenderService.SendEmailAsync(model.ContactEmail, "Данные для входа в личный кабинет",
             $"""
              <head></head>
