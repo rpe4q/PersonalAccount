@@ -96,6 +96,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(group => group.Description)
                 .HasColumnName("description")
                 .HasMaxLength(2047)
+                .HasDefaultValue(string.Empty)
                 .IsRequired();
 
             entity.Property(group => group.ImageUrl)

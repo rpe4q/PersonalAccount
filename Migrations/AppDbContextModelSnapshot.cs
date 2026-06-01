@@ -105,8 +105,10 @@ namespace PersonalAccount.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(2047)
                         .HasColumnType("TEXT")
+                        .HasDefaultValue("")
                         .HasColumnName("description");
 
                     b.Property<string>("ImageUrl")

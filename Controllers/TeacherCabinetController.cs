@@ -16,23 +16,21 @@ public class TeacherCabinetController(ITeacherCabinetService cabinetService) : C
         var accountId = User.GetId();
         if (accountId == null) return Forbid();
 
-        var disciplines = await cabinetService.GetAllDisciplinesAsync(accountId.Value);
-        var disciplineIds = disciplines
-            .OrderBy(discipline => discipline.Name)
-            .Select(discipline => discipline.Id)
-            .ToList();
-        var groupsByDisciplines = await cabinetService.GetAllGroupsByDisciplinesAsync(accountId.Value, disciplineIds);
+        var groupsByDisciplines = await cabinetService.GetAllGroupsByDisciplinesAsync(accountId.Value);
 
         return View(new TeacherCabinetViewModel
         {
-            DisciplineIdsOrder = disciplineIds,
-            Disciplines = disciplines.ToDictionary(discipline => discipline.Id,
+            DisciplineIdsOrder = groupsByDisciplines.Keys
+                .OrderBy(discipline => discipline.Name)
+                .Select(discipline => discipline.Id)
+                .ToList(),
+            Disciplines = groupsByDisciplines.Keys.ToDictionary(discipline => discipline.Id,
                 discipline =>
                     new TeacherCabinetDisciplineViewModel
                     {
                         Name = discipline.Name,
                     }),
-            Groups = groupsByDisciplines.ToDictionary(groups => groups.Key,
+            Groups = groupsByDisciplines.ToDictionary(groups => groups.Key.Id,
                 groups => groups.Value.Select(group => new TeacherCabinetGroupViewModel
                 {
                     Name = group.Name,

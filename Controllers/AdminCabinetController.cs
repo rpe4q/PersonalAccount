@@ -27,21 +27,21 @@ public class AdminCabinetController(
 
         return View(new AdminCabinetViewModel
         {
-            GroupIdsOrder = groups.OrderBy(group => group.Name).Select(group => group.Id).ToList(),
-            Groups = groupsDictionary.Select(group => (group.Key, new AdminCabinetGroupViewModel
-            {
-                Name = group.Value.Name,
-                ImageUrl = group.Value.ImageUrl?.ToString(),
-                Description = group.Value.Description
-            })).ToDictionary(),
-            StudentProfiles = profiles.GroupBy(profile => profile.GroupId)
-                .ToDictionary(group => group.Key, group =>
-                    group.Select(profile => new AdminCabinetStudentViewModel
-                    {
-                        Email = accounts[profile.AccountId].Email,
-                        FullName = profile.FullName,
-                        PhotoUrl = profile.PhotoUrl?.ToString()
-                    }).ToList())
+            // GroupIdsOrder = groups.OrderBy(group => group.Name).Select(group => group.Id).ToList(),
+            // Groups = groupsDictionary.Select(group => (group.Key, new AdminCabinetGroupViewModel
+            // {
+            //     Name = group.Value.Name,
+            //     ImageUrl = group.Value.ImageUrl?.ToString(),
+            //     Description = group.Value.Description
+            // })).ToDictionary(),
+            // Students = profiles.GroupBy(profile => profile.GroupId)
+            //     .ToDictionary(group => group.Key, group =>
+            //         group.Select(profile => new AdminCabinetStudentViewModel
+            //         {
+            //             Email = accounts[profile.AccountId].Email,
+            //             FullName = profile.FullName,
+            //             PhotoUrl = profile.PhotoUrl?.ToString()
+            //         }).ToList())
         });
     }
 
@@ -65,6 +65,39 @@ public class AdminCabinetController(
         }
 
         var password = await accountService.RegisterAsync(model.Email, AccountRoles.Student);
+        await cabinetService.AddStudentProfileAsync(model.Email, model.FullName);
+        await emailSenderService.SendEmailAsync(model.ContactEmail, "Данные для входа в личный кабинет",
+            $"""
+             <head></head>
+             <body>
+             <p>{model.Email}</p>
+             <p>{password}</p>
+             </body>
+             """);
+
+        return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public IActionResult AddTeacher()
+    {
+        return View(new AddTeacherViewModel());
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddTeacher(AddTeacherViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var isAlreadyRegistered = await accountService.IsRegisteredAsync(model.Email);
+        if (isAlreadyRegistered)
+        {
+            ModelState.AddModelError(string.Empty, "Email is already registered");
+            return View(model);
+        }
+
+        var password = await accountService.RegisterAsync(model.Email, AccountRoles.Teacher);
         await cabinetService.AddStudentProfileAsync(model.Email, model.FullName);
         await emailSenderService.SendEmailAsync(model.ContactEmail, "Данные для входа в личный кабинет",
             $"""
