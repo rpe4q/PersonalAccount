@@ -53,6 +53,10 @@
                             <span class="text-primary">@teacher.Email</span>
                             <span>@teacher.FullName</span>
                         </div>
+                        <form class="card-footer" method="get" asp-action="EditTeacher">
+                            <input type="hidden" name="teacherAccountId" value="@teacher.AccountId"/>
+                            <button class="btn btn-outline-secondary">Редактировать</button>
+                        </form>
                     </div>
                 }
             </div>

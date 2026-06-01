@@ -11,7 +11,8 @@ namespace PersonalAccount.Controllers;
 
 [Authorize(Roles = AccountRoleConstants.Admin)]
 public class AdminCabinetController(
-    IAdminCabinetService cabinetService,
+    IAdminCabinetService adminCabinetService,
+    ITeacherCabinetService teacherCabinetService,
     IAccountService accountService,
     IEmailSenderService emailSenderService
 ) : Controller
@@ -19,11 +20,11 @@ public class AdminCabinetController(
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var accounts = await cabinetService.GetAllStudentAndTeacherAccountsAsync();
+        var accounts = await adminCabinetService.GetAllStudentAndTeacherAccountsAsync();
         var accountsDictionary = accounts.ToDictionary(account => account.Id);
-        var studentProfiles = await cabinetService.GetAllStudentProfilesAsync();
-        var teacherProfiles = await cabinetService.GetAllTeacherProfilesAsync();
-        var groups = await cabinetService.GetAllGroupsAsync();
+        var studentProfiles = await adminCabinetService.GetAllStudentProfilesAsync();
+        var teacherProfiles = await adminCabinetService.GetAllTeacherProfilesAsync();
+        var groups = await adminCabinetService.GetAllGroupsAsync();
         var groupsDictionary = groups.ToDictionary(group => group.Id);
 
         return View(new AdminCabinetViewModel
@@ -33,6 +34,7 @@ public class AdminCabinetController(
                 .Select(teacherProfile =>
                     new AdminCabinetTeacherViewModel
                     {
+                        AccountId = teacherProfile.AccountId,
                         FullName = teacherProfile.FullName,
                         Email = accountsDictionary[teacherProfile.AccountId].Email,
                         PhotoUrl = teacherProfile.PhotoUrl?.ToString()
@@ -69,7 +71,7 @@ public class AdminCabinetController(
         }
 
         var password = await accountService.RegisterAsync(model.Email, AccountRoles.Student);
-        await cabinetService.AddStudentProfileAsync(model.Email, model.FullName);
+        await adminCabinetService.AddStudentProfileAsync(model.Email, model.FullName);
         await emailSenderService.SendEmailAsync(model.ContactEmail, "Данные для входа в личный кабинет",
             $"""
              <head></head>
@@ -102,7 +104,7 @@ public class AdminCabinetController(
         }
 
         var password = await accountService.RegisterAsync(model.Email, AccountRoles.Teacher);
-        await cabinetService.AddTeacherProfileAsync(model.Email, model.FullName);
+        await adminCabinetService.AddTeacherProfileAsync(model.Email, model.FullName);
         await emailSenderService.SendEmailAsync(model.ContactEmail, "Данные для входа в личный кабинет",
             $"""
              <head></head>
@@ -113,5 +115,49 @@ public class AdminCabinetController(
              """);
 
         return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditTeacher(int teacherAccountId)
+    {
+        var groupsByDisciplines = await teacherCabinetService.GetAllGroupsByDisciplinesAsync(teacherAccountId);
+        var allGroups = await adminCabinetService.GetAllGroupsAsync();
+
+        return View(new EditTeacherViewModel
+        {
+            TeacherAccountId = teacherAccountId,
+            DisciplineIdsOrder = groupsByDisciplines.Keys
+                .OrderBy(discipline => discipline.Name)
+                .Select(discipline => discipline.Id)
+                .ToList(),
+            Disciplines = groupsByDisciplines.Keys.ToDictionary(discipline => discipline.Id,
+                discipline =>
+                    new EditTeacherDisciplineViewModel
+                    {
+                        Name = discipline.Name,
+                        Id = discipline.Id,
+                    }),
+            Groups = groupsByDisciplines.ToDictionary(groups => groups.Key.Id,
+                groups => groups.Value.Select(group => new EditTeacherGroupViewModel
+                {
+                    Id = group.Id,
+                    Name = group.Name,
+                    ImageUrl = group.ImageUrl?.ToString()
+                }).ToList()),
+            AllGroups = allGroups.Where(group => group.Id != GroupConstants.NoGroupId).Select(group =>
+                new EditTeacherGroupOptionViewModel
+                {
+                    Name = group.Name,
+                    Id = group.Id,
+                }).ToList()
+        });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditTeacher(int teacherAccountId, int disciplineId, int groupId)
+    {
+        await adminCabinetService.AddTeacherGroupDisciplineAsync(teacherAccountId, groupId, disciplineId);
+        return RedirectToAction("EditTeacher", new { teacherAccountId });
     }
 }

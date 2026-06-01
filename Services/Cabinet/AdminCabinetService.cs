@@ -8,7 +8,8 @@ public class AdminCabinetService(
     IAccountRepo accountRepo,
     IGroupRepo groupRepo,
     IStudentProfileRepo studentProfileRepo,
-    ITeacherProfileRepo teacherProfileRepo
+    ITeacherProfileRepo teacherProfileRepo,
+    ITeacherGroupDisciplineRepo teacherGroupDisciplineRepo
 ) : IAdminCabinetService
 {
     public async Task<List<AccountModel>> GetAllStudentAndTeacherAccountsAsync() =>
@@ -24,6 +25,14 @@ public class AdminCabinetService(
 
     public async Task AddTeacherProfileAsync(string email, string fullName) =>
         await AddProfileAsync(teacherProfileRepo, email, fullName);
+
+    public async Task AddTeacherGroupDisciplineAsync(int teacherAccountId, int groupId, int disciplineId) =>
+        await teacherGroupDisciplineRepo.AddAsync(new TeacherGroupDisciplineModel
+        {
+            DisciplineId = disciplineId,
+            GroupId = groupId,
+            TeacherAccountId = teacherAccountId
+        });
 
     private async Task AddProfileAsync<TProfileModel>(
         IProfileRepo<TProfileModel> profileRepo,
