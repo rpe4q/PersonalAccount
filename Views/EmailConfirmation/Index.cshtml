@@ -1,0 +1,15 @@
+﻿@model ConfirmEmailViewModel
+
+<div class="container d-flex align-content-center justify-content-center">
+    <div class="card w-50">
+        <header class="card-header">
+            <h1 class="text-center">
+                Подтверждение почты
+            </h1>
+        </header>
+        <form class="card-body" method="post" asp-controller="EmailConfirmation" asp-action="ConfirmEmail">
+            <p class="text-centermb-3">Нажмите, чтобы подтвердить почту</p>
+            <button class="btn btn-primary w-100">Подтвердить</button>
+        </form>
+    </div>
+</div>

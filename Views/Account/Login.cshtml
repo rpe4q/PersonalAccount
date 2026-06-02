@@ -1,24 +1,39 @@
 ﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Вход";
+}
 
-<h1>Вход</h1>
+<div class="container d-flex align-content-center justify-content-center">
+    <div class="card w-50">
+        <header class="card-header">
+            <h1 class="text-center">
+                Личный кабинет
+            </h1>
+        </header>
+        <form class="card-body" method="post">
+            <p class="text-center">Войдите под своей учетной записью</p>
 
-<form method="post">
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" autocomplete="off"/>
-        <span asp-validation-for="Email"></span>
+            <div class="alert-danger alert"  asp-validation-summary="ModelOnly"></div>
+            
+            <div class="mb-3">
+                <label class="form-label" asp-for="Email"></label>
+                <input class="form-control" asp-for="Email" autocomplete="off"/>
+                <span class="text-danger small" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" asp-for="Password"></label>
+                <input class="form-control" asp-for="Password"/>
+                <span class="text-danger small" asp-validation-for="Password"></span>
+            </div>
+
+            <input type="hidden" asp-for="ReturnUrl"/>
+            <button class="btn btn-primary w-100" type="submit">
+                Войти
+            </button>
+
+        </form>
     </div>
-    
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password"/>
-        <span asp-validation-for="Password"></span>
-    </div>
-    
-    <input type="hidden" asp-for="ReturnUrl"/>
-    <button type="submit">
-        Войти
-    </button>
-    
-    <div asp-validation-summary="All"></div>
-</form>
+</div>
+
+

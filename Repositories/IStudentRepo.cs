@@ -1,4 +1,4 @@
-﻿using PersonalAccount.Models.Students;
+using PersonalAccount.Models.Students;
 
 namespace PersonalAccount.Repositories
 {
