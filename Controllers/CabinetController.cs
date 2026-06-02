@@ -60,9 +60,11 @@ public class CabinetController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ConfirmStudentEmail(int id)
+    public async Task<IActionResult> ConfirmStudentEmail(
+        int id,
+        [FromServices] IAdminCabinetService cabinetService)
     {
-        
+        await cabinetService.ConfirmStudentEmailAsync(id);
 
         return RedirectToAction("Admin");
     }

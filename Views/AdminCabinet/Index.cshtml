@@ -20,14 +20,16 @@
                 </div>
                 <div class="d-flex flex-column align-items-stretch justify-content-center">
                     @if(!student.IsEmailConfirmed){
-                        <span class="mb-1 text-danger">Не подтвержден</span>
-                        <form method="post">
-                            <input type="hidden" name="studentId" value="@student.AccountId" />
-                            <button class="btn btn-link nav-link text-danger" type="submit">Подтвердить</button>
+                        <span class="mb-1 text-danger">Почта не подтверждена</span>
+                        <form method="post" asp-action="ConfirmStudentEmail" asp-controller="Cabinet">
+                            <input type="hidden" name="id" value="@student.AccountId" />
+                            <button class="btn btn-link nav-link text-danger" type="submit">
+                                Подтвердить почту
+                            </button>
                         </form>
                     } else {
                         <span class="mb-1 text-primary">@student.Email &nbsp;</span>
-                        <span class="mb-1 text-success">Подтвержден</span>
+                        <span class="mb-1 text-success">Почта подтверждена</span>
                     }
                     <span class="mb-1">@student.FullName</span>
                     <span class="mb-1">@student.GroupName</span>
