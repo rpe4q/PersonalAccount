@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PersonalAccount.Data;
 using PersonalAccount.Data.Entities;
-using PersonalAccount.Models.Students;
+using PersonalAccount.Mappers;
+using PersonalAccount.Models;
 using PersonalAccount.Repositories;
-using PersonalAccount.Repositories.Mappers;
-using PersonalAccount.Services;
-using PersonalAccount.Services.Auth;
+using PersonalAccount.Services.Account;
+using PersonalAccount.Services.Cabinet;
+using PersonalAccount.Services.Confirmation;
 using PersonalAccount.Services.Db;
 
 namespace PersonalAccount
@@ -26,25 +27,42 @@ namespace PersonalAccount
                     options.LoginPath = "/Account/Login";
                     options.LogoutPath = "/Account/Logout";
                     // options.AccessDeniedPath = "/Account/AccessDenied";
-                    options.ExpireTimeSpan = TimeSpan.FromDays(int.Parse(builder.Configuration["Auth:ExpireTimeInDays"]!));
+                    options.ExpireTimeSpan =
+                        TimeSpan.FromDays(int.Parse(builder.Configuration["Auth:ExpireTimeInDays"]!));
                     options.SlidingExpiration = true;
                 });
             builder.Services.AddAuthorization();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlite(builder.Configuration.GetConnectionString("SqliteDefaultConnection")));
 
-            builder.Services.AddScoped<IStudentAuthService, StudentAuthService>();
-            builder.Services.AddScoped<IPasswordHasher<StudentAuthModel>, PasswordHasher<StudentAuthModel>>();
-            builder.Services.AddScoped<IStudentRepo<StudentAuthModel>, StudentRepo<StudentAuthModel>>();
-            builder.Services.AddScoped<IMapper<StudentEntity, StudentAuthModel>, StudentAuthMapper>();
-            
-            // Регистрация сервисов для работы с данными студентов (StudentModel)
-            builder.Services.AddScoped<IMapper<StudentEntity, StudentModel>, StudentModelMapper>();
-            builder.Services.AddScoped<IStudentRepo<StudentModel>, StudentRepo<StudentModel>>();
-            builder.Services.AddScoped<IStudentService, StudentService>();
-            
+            // Options
+            builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+            builder.Services.Configure<DbBootstrapSettings>(builder.Configuration.GetSection("DbBootstrap"));
+
+            // Services
+            builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IConfirmationTokenService, ConfirmationTokenService>();
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
             if (builder.Environment.IsDevelopment())
-                builder.Services.AddScoped<DbSeeder>();
+                builder.Services.AddScoped<DbBootstrap>();
+
+            // Cabinet Services
+            builder.Services.AddScoped<IStudentCabinetService, StudentCabinetService>();
+            builder.Services.AddScoped<IAdminCabinetService, AdminCabinetService>();
+
+            // Repositories
+            builder.Services.AddScoped<IAccountRepo, AccountRepo>();
+            builder.Services.AddScoped<IStudentProfileRepo, StudentProfileRepo>();
+            builder.Services.AddScoped<IConfirmationTokenRepo, ConfirmationTokenRepo>();
+
+            // Mappers
+            builder.Services.AddSingleton<IMapper<AccountEntity, AccountModel>, AccountMapper>();
+            builder.Services.AddSingleton<IMapper<StudentProfileEntity, StudentProfileModel>, StudentProfileMapper>();
+            builder.Services
+                .AddSingleton<IMapper<ConfirmationTokenEntity, ConfirmationTokenModel>, ConfirmationTokenMapper>();
+
+            // Others
+            builder.Services.AddSingleton<IPasswordHasher<AccountModel>, PasswordHasher<AccountModel>>();
 
             var app = builder.Build();
 
@@ -52,7 +70,7 @@ namespace PersonalAccount
             if (app.Environment.IsDevelopment())
             {
                 using var scope = app.Services.CreateScope();
-                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                var seeder = scope.ServiceProvider.GetRequiredService<DbBootstrap>();
                 await seeder.SeedAsync();
             }
             else

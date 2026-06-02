@@ -1,55 +1,71 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PersonalAccount.Types;
 using PersonalAccount.Utils;
+using PersonalAccount.ViewModels;
+using static PersonalAccount.Types.AccountRoles;
+using PersonalAccount.Services.Cabinet;
+using PersonalAccount.Services.Confirmation;
 
 namespace PersonalAccount.Controllers;
 
 [Authorize]
-public class CabinetController(IStudentService students) : Controller
+public class CabinetController : Controller
 {
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        var studentId = User.GetId();
-        if (studentId == null) return RedirectToAction("Error", "Home");
+        var role = User.GetRole();
+        if (role == null) return Forbid();
 
-        var student = await students.GetStudentByIdAsync(studentId.Value);
-        if (student == null) return RedirectToAction("Error", "Home");
-
-        return View(student);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> Edit()
-    {
-        var studentId = User.GetId();
-        if (studentId == null) return RedirectToAction("Error", "Home");
-
-        var student = await students.GetStudentByIdAsync(studentId.Value);
-        if (student == null) return RedirectToAction("Error", "Home");
-
-        return View(new StudentEditViewModel
+        return role.Value switch
         {
+            Administrator => RedirectToAction("Index", "AdminCabinet"),
+            Student => RedirectToAction("Index", "StudentCabinet"),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
+    [HttpGet]
+    public async Task<IActionResult> Admin(
+        [FromServices] IStudentCabinetService cabinetService,
+        [FromServices] IConfirmationTokenService confirmationService)
+    {
+        var role = User.GetRole();
+        if (role != Administrator)
+            return Forbid();
+
+        var accountId = User.GetId();
+        var accountEmail = User.GetEmail();
+        if (accountId == null || accountEmail == null)
+            return RedirectToAction("Error", "Home");
+
+        var student = await cabinetService
+            .GetByAccountIdAsync(accountId.Value);
+        if (student == null)
+            return RedirectToAction("Error", "Home");
+
+        var isEmailConfirmed = await confirmationService
+            .HasAnyConfirmedTokenAsync(accountId.Value);
+
+        return View(new AdminCabinetStudentViewModel
+        {
+            AccountId = accountId.Value,
+            Email = accountEmail,
             FullName = student.FullName,
             GroupName = student.GroupName,
-            PhotoUrl = student.PhotoUrl?.ToString()
+            PhotoUrl = student.PhotoUrl?.ToString(),
+            IsEmailConfirmed = isEmailConfirmed
         });
     }
-
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(StudentEditViewModel model)
+    public async Task<IActionResult> ConfirmStudentEmail(
+        int id,
+        [FromServices] IAdminCabinetService cabinetService)
     {
-        if (!ModelState.IsValid) return View(model);
+        await cabinetService.ConfirmStudentEmailAsync(id);
 
-        if (model == null) return RedirectToAction("Error", "Home");
-
-        var studentId = User.GetId();
-        if (studentId == null) return RedirectToAction("Error", "Home");
-
-        var success = await students.UpdateStudentAsync(studentId.Value, model);
-        if (!success) return RedirectToAction("Error", "Home");
-
-        return RedirectToAction("Index");
+        return RedirectToAction("Admin");
     }
 }

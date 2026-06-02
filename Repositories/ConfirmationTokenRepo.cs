@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PersonalAccount.Data;
 using PersonalAccount.Data.Entities;
+using PersonalAccount.Mappers;
 using PersonalAccount.Models;
-using PersonalAccount.Repositories.Mappers;
 
 namespace PersonalAccount.Repositories;
 
@@ -14,15 +14,15 @@ public class ConfirmationTokenRepo(
 
     public async Task CreateAsync(ConfirmationTokenModel token)
     {
-        await ConfirmationTokens.AddAsync(mapper.ToEntity(token)!);
+        await ConfirmationTokens.AddAsync(mapper.ToEntity(token));
         await context.SaveChangesAsync();
     }
 
-    public async Task<List<ConfirmationTokenModel>> GetByStudentIdAsync(int studentId) =>
+    public async Task<List<ConfirmationTokenModel>> GetByAccountIdAsync(int accountId) =>
         await ConfirmationTokens
             .AsNoTracking()
-            .Where(entity => entity.StudentId == studentId)
-            .Select(entity => mapper.ToModel(entity)!)
+            .Where(entity => entity.AccountId == accountId)
+            .Select(entity => mapper.ToModel(entity))
             .ToListAsync();
 
     public async Task ConfirmByIdAsync(int id)

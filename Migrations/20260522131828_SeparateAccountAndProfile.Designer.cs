@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonalAccount.Data;
 
@@ -10,9 +11,11 @@ using PersonalAccount.Data;
 namespace PersonalAccount.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260522131828_SeparateAccountAndProfile")]
+    partial class SeparateAccountAndProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.8");
@@ -34,10 +37,6 @@ namespace PersonalAccount.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("password_hash");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("role");
 
                     b.HasKey("Id");
 
@@ -110,7 +109,7 @@ namespace PersonalAccount.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
-                    b.ToTable("student_profiles", (string)null);
+                    b.ToTable("students", (string)null);
                 });
 
             modelBuilder.Entity("PersonalAccount.Data.Entities.ConfirmationTokenEntity", b =>

@@ -1,0 +1,36 @@
+@model StudentCabinetViewModel
+@{
+    ViewData["Title"] = "Личный кабинет";
+}
+
+<div class="container d-flex flex-column">
+    <header class="mb-3">
+        <h1 class="text-start text-uppercase">Личный кабинет студента</h1>
+    </header>
+    <div class="card w-50">
+        @if (Model.PhotoUrl != null)
+        {
+            <img class="card-img-top" src="@Model.PhotoUrl" alt="Фото студента"/>
+        }
+        <header class="card-header">
+            <h3 class="text-center">@Model.FullName</h3>
+        </header>
+        <main class="card-body">
+            <p class="mb-1 fw-semibold">Группа: @Model.GroupName</p>
+            <form class="d-flex gap-2 align-content-center" asp-controller="EmailConfirmation"
+                  asp-action="SendEmailConfirmation">
+                <span class="mb-1 text-primary">@Model.Email</span>
+                @if (Model.IsEmailConfirmed)
+                {
+                    <span class="text-success fst-italic">Почта подтверждена</span>
+                }
+                else
+                {
+                    <button class="btn btn-link nav-link text-danger" type="submit">Подтвердить</button>
+                }
+            </form>
+
+        </main>
+    </div>
+</div>
+

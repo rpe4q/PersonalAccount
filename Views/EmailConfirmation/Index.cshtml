@@ -8,6 +8,8 @@
             </h1>
         </header>
         <form class="card-body" method="post" asp-controller="EmailConfirmation" asp-action="ConfirmEmail">
+            <input type="hidden" asp-for="AccountId" value="@Model.AccountId"/>
+            <input type="hidden" asp-for="Token" value="@Model.Token"/>
             <p class="text-centermb-3">Нажмите, чтобы подтвердить почту</p>
             <button class="btn btn-primary w-100">Подтвердить</button>
         </form>

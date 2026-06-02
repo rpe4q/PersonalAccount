@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PersonalAccount.Models;
+namespace PersonalAccount.ViewModels;
 
 public class ConfirmEmailViewModel
 {
-    [Required] public int StudentId { get; set; }
+    [Required] public int AccountId { get; set; }
     [Required] public string Token { get; set; } = string.Empty;
 }
