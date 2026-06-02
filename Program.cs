@@ -10,7 +10,6 @@ using PersonalAccount.Services.Account;
 using PersonalAccount.Services.Cabinet;
 using PersonalAccount.Services.Confirmation;
 using PersonalAccount.Services.Db;
-using PersonalAccount.Services.Email;
 
 namespace PersonalAccount
 {
@@ -97,22 +96,3 @@ namespace PersonalAccount
         }
     }
 }
-// Auth
-// Personal Account
-
-
-// Client -> Server -> Page -> PageModel -> Client
-
-
-// Client -> Server ->  Controller -> Model
-//                      Controller -> View -> Client
-
-
-// MVC 
-// MVVM
-
-
-// Client -> Backend -> Controller -> Service -> Repository
-//                      Controller -> JSON -> Client
-
-// Client -> Frontend -> View -> Client
