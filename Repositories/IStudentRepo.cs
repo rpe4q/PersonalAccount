@@ -1,4 +1,4 @@
-﻿using PersonalAccount.Models.Students;
+using PersonalAccount.Models.Students;
 
 namespace PersonalAccount.Repositories
 {
@@ -6,5 +6,7 @@ namespace PersonalAccount.Repositories
     {
         public Task<T?> GetByEmailAsync(string email);
         public Task<T?> GetByIdAsync(int id);
+        Task UpdateByIdAsync(int id, T student);
     }
 }
+

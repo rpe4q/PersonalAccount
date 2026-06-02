@@ -1,31 +1,15 @@
-﻿@model StudentModel
-@{
-    ViewData["Title"] = "Личный кабинет";
-}
+@model StudentModel
 
-<div class="container d-flex flex-column">
-    <header class="mb-3">
-        <h1 class="text-start text-uppercase">Личный кабинет студента</h1>
-    </header>
-    <div class="card w-50">
-        @if (Model.PhotoUrl != null)
-        {
-            <img class="card-img-top" src="@Model.PhotoUrl" alt="Фото студента"/>
-        }
-        <header class="card-header">
-            <h3 class="text-center">@Model.FullName</h3>
-        </header>
-        <main class="card-body">
-            <p class="mb-1 fw-semibold">Группа: @Model.GroupName</p>
-            <form class="d-flex align-content-center" asp-controller="EmailConfirmation" asp-action="SendEmailConfirmation">
-                <span class="mb-1 text-primary">@Model.Email</span>
-                <button class="btn btn-link text-danger" type="submit" >Подтвердить</button>
-            </form>
+<h1 class="fw-bold">Личный кабинет</h1>
+@* <p>ID: @Model.Id</p> *@
+<img src="@Model.PhotoUrl" alt="@Model.FullName" width="320"/>
+<h3 class="mt-2">Full Name</h3>
+<p>@Model.FullName</p>
+<h3>Group Name</h3>
+<p>@Model.GroupName</p>
+<h3>Email</h3>
+<p>@Model.Email</p>
 
-        </main>
-        <footer class="card-footer">
-            <p class="text-end">ID: @Model.Id</p>
-        </footer>
-    </div>
-</div>
-
+<form method="get" asp-controller="Cabinet" asp-action="Edit">
+    <button class="btn btn-primary" type="submit">Редактировать</button>
+</form>

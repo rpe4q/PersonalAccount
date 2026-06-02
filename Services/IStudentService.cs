@@ -1,8 +1,9 @@
-﻿using PersonalAccount.Models.Students;
-
-namespace PersonalAccount.Services;
+using PersonalAccount.Models.Students;
 
 public interface IStudentService
 {
-    Task<StudentModel?> GetByIdAsync(int id);
+    public Task<StudentModel?> GetStudentByIdAsync(int id);
+    public Task<StudentModel?> GetStudentByEmailAsync(string email);
+    Task UpdateByIdAsync(int id, StudentModel student);
+    Task<bool> UpdateStudentAsync(int id, StudentEditViewModel model);
 }
