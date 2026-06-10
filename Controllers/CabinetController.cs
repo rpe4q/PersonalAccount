@@ -14,6 +14,14 @@ public class CabinetController : Controller
         var role = User.GetRole();
         if (role == null) return Forbid();
 
-        return RedirectToAction("Index", $"{role.Value.ToString()}Cabinet");
+        var controllerName = role.Value switch
+        {
+            AccountRoles.Admin => "AdminCabinet",
+            AccountRoles.Teacher => "TeacherCabinet",
+            AccountRoles.Student => "StudentCabinet",
+            _ => throw new InvalidOperationException($"Unknown role: {role.Value}")
+        };
+
+        return RedirectToAction("Index", controllerName);
     }
 }

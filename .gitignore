@@ -575,3 +575,4 @@ __pycache__/
 full.targets.txt
 
 
+*.ps1
