@@ -9,12 +9,12 @@ using PersonalAccount.Types;
 
 namespace PersonalAccount.Services.Account
 {
-    public class AccountService(IAccountRepo accounts, IPasswordHasher<AccountModel> hasher)
+    public class AccountService(IAccountRepo accountRepo, IPasswordHasher<AccountModel> hasher)
         : IAccountService
     {
         public async Task<AccountModel?> ValidateCredentialsAsync(string email, string password)
         {
-            var account = await accounts.GetByEmailAsync(email);
+            var account = await accountRepo.GetByEmailAsync(email);
             if (account is null) return null;
 
             var result = hasher.VerifyHashedPassword(account, account.PasswordHash, password);
@@ -47,9 +47,15 @@ namespace PersonalAccount.Services.Account
             };
             var password = Convert.ToHexString(RandomNumberGenerator.GetBytes(8));
             account.PasswordHash = hasher.HashPassword(account, password);
-            await accounts.AddAsync(account);
-            
+            await accountRepo.AddAsync(account);
+
             return password;
+        }
+
+        public async Task<bool> IsRegisteredAsync(string email)
+        {
+            var account = await accountRepo.GetByEmailAsync(email);
+            return account != null;
         }
     }
 }

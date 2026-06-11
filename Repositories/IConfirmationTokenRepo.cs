@@ -2,9 +2,8 @@
 
 namespace PersonalAccount.Repositories;
 
-public interface IConfirmationTokenRepo
+public interface IConfirmationTokenRepo : IRepo<ConfirmationTokenModel>
 {
-    Task CreateAsync(ConfirmationTokenModel token);
-    Task<List<ConfirmationTokenModel>> GetByAccountIdAsync(int accountId);
-    Task ConfirmByIdAsync(int id);
+    Task<List<ConfirmationTokenModel>> GetAllByAccountIdAsync(int accountId);
+    Task ConfirmByIdAsync(int id, DateTime confirmedAt);
 }

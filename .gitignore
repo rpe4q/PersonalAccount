@@ -575,4 +575,4 @@ __pycache__/
 full.targets.txt
 
 
-usecrinit.ps1
+*.ps1

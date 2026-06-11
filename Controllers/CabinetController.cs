@@ -18,12 +18,15 @@ public class CabinetController : Controller
         var role = User.GetRole();
         if (role == null) return Forbid();
 
-        return role.Value switch
+        var controllerName = role.Value switch
         {
-            Administrator => RedirectToAction("Index", "AdminCabinet"),
-            Student => RedirectToAction("Index", "StudentCabinet"),
-            _ => throw new ArgumentOutOfRangeException()
+            AccountRoles.Admin => "AdminCabinet",
+            AccountRoles.Teacher => "TeacherCabinet",
+            AccountRoles.Student => "StudentCabinet",
+            _ => throw new InvalidOperationException($"Unknown role: {role.Value}")
         };
+
+        return RedirectToAction("Index", controllerName);
     }
     [HttpGet]
     public async Task<IActionResult> Admin(

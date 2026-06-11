@@ -36,7 +36,9 @@ namespace PersonalAccount.Migrations
                         .HasColumnName("password_hash");
 
                     b.Property<int>("Role")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
+                        .HasDefaultValue(4)
                         .HasColumnName("role");
 
                     b.HasKey("Id");
@@ -78,6 +80,55 @@ namespace PersonalAccount.Migrations
                     b.ToTable("confirmation_tokens", (string)null);
                 });
 
+            modelBuilder.Entity("PersonalAccount.Data.Entities.DisciplineEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("disciplines", (string)null);
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.GroupEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(2047)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(2047)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("image_url");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("groups", (string)null);
+                });
+
             modelBuilder.Entity("PersonalAccount.Data.Entities.StudentProfileEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -95,11 +146,9 @@ namespace PersonalAccount.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("full_name");
 
-                    b.Property<string>("GroupName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT")
-                        .HasColumnName("group_name");
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
 
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("TEXT")
@@ -110,7 +159,68 @@ namespace PersonalAccount.Migrations
                     b.HasIndex("AccountId")
                         .IsUnique();
 
+                    b.HasIndex("GroupId");
+
                     b.ToTable("student_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.TeacherGroupDisciplineEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<int>("DisciplineId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("discipline_id");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("group_id");
+
+                    b.Property<int>("TeacherAccountId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("teacher_account_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisciplineId");
+
+                    b.HasIndex("GroupId");
+
+                    b.HasIndex("TeacherAccountId");
+
+                    b.ToTable("teacher_group_disciplines", (string)null);
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.TeacherProfileEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("account_id");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("full_name");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("photo_url");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.ToTable("teacher_profiles", (string)null);
                 });
 
             modelBuilder.Entity("PersonalAccount.Data.Entities.ConfirmationTokenEntity", b =>
@@ -132,6 +242,51 @@ namespace PersonalAccount.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("PersonalAccount.Data.Entities.GroupEntity", "Group")
+                        .WithMany("StudentProfiles")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.TeacherGroupDisciplineEntity", b =>
+                {
+                    b.HasOne("PersonalAccount.Data.Entities.DisciplineEntity", "Discipline")
+                        .WithMany("TeacherGroupDisciplines")
+                        .HasForeignKey("DisciplineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonalAccount.Data.Entities.GroupEntity", "Group")
+                        .WithMany("TeacherGroupDisciplines")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PersonalAccount.Data.Entities.AccountEntity", "TeacherAccount")
+                        .WithMany("TeacherGroupDisciplines")
+                        .HasForeignKey("TeacherAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Discipline");
+
+                    b.Navigation("Group");
+
+                    b.Navigation("TeacherAccount");
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.TeacherProfileEntity", b =>
+                {
+                    b.HasOne("PersonalAccount.Data.Entities.AccountEntity", "Account")
+                        .WithOne("TeacherProfile")
+                        .HasForeignKey("PersonalAccount.Data.Entities.TeacherProfileEntity", "AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
                 });
 
@@ -140,6 +295,22 @@ namespace PersonalAccount.Migrations
                     b.Navigation("ConfirmationTokens");
 
                     b.Navigation("StudentProfile");
+
+                    b.Navigation("TeacherGroupDisciplines");
+
+                    b.Navigation("TeacherProfile");
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.DisciplineEntity", b =>
+                {
+                    b.Navigation("TeacherGroupDisciplines");
+                });
+
+            modelBuilder.Entity("PersonalAccount.Data.Entities.GroupEntity", b =>
+                {
+                    b.Navigation("StudentProfiles");
+
+                    b.Navigation("TeacherGroupDisciplines");
                 });
 #pragma warning restore 612, 618
         }

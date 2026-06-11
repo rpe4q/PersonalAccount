@@ -5,7 +5,7 @@ using MimeKit;
 
 namespace PersonalAccount.Services.Email;
 
-public class EmailSender(IOptions<SmtpSettings> options) : IEmailSender
+public class EmailSenderService(IOptions<SmtpSettings> options) : IEmailSenderService
 {
     private readonly SmtpSettings _settings = options.Value;
 

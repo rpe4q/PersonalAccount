@@ -9,5 +9,6 @@ namespace PersonalAccount.Services.Account
         Task SignInAsync(HttpContext ctx, AccountModel account);
         Task SignOutAsync(HttpContext ctx);
         Task<string> RegisterAsync(string email, AccountRoles role);
+        Task<bool> IsRegisteredAsync(string email);
     }
 }

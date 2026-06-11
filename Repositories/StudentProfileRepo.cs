@@ -7,22 +7,15 @@ using PersonalAccount.Models;
 namespace PersonalAccount.Repositories;
 
 public class StudentProfileRepo(AppDbContext context, IMapper<StudentProfileEntity, StudentProfileModel> mapper)
-    : IStudentProfileRepo
+    : ProfileRepo<StudentProfileEntity, StudentProfileModel>(context, mapper, ctx => ctx.StudentProfiles),
+        IStudentProfileRepo
 {
-    private DbSet<StudentProfileEntity> StudentProfiles => context.StudentProfiles;
-
-    public async Task<StudentProfileModel?> GetByAccountIdAsync(int accountId)
+    public async Task UpdateGroupByAccountIdAsync(int accountId, int groupId)
     {
-        var entity = await StudentProfiles
-            .AsNoTracking()
-            .FirstOrDefaultAsync(entity => entity.AccountId == accountId);
+        var entity = await Table.FirstOrDefaultAsync(e => e.AccountId == accountId)
+            ?? throw new KeyNotFoundException();
 
-        return entity == null ? null : mapper.ToModel(entity);
+        entity.GroupId = groupId;
+        await Context.SaveChangesAsync();
     }
-
-    public async Task<List<StudentProfileModel>> GetAllAsync() =>
-        await StudentProfiles
-            .AsNoTracking()
-            .Select(entity => mapper.ToModel(entity))
-            .ToListAsync();
 }

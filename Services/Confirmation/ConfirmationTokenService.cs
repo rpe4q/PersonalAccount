@@ -5,7 +5,7 @@ using PersonalAccount.Repositories;
 
 namespace PersonalAccount.Services.Confirmation;
 
-public class ConfirmationTokenService(IConfirmationTokenRepo confirmations) : IConfirmationTokenService
+public class ConfirmationTokenService(IConfirmationTokenRepo confirmationTokenRepo) : IConfirmationTokenService
 {
     public async Task<string> GenerateTokenAsync(int accountId)
     {
@@ -16,13 +16,13 @@ public class ConfirmationTokenService(IConfirmationTokenRepo confirmations) : IC
             ExpiresAt = DateTime.UtcNow.AddMinutes(30),
             TokenHash = HashToken(token),
         };
-        await confirmations.CreateAsync(confirmation);
+        await confirmationTokenRepo.AddAsync(confirmation);
         return token;
     }
 
     public async Task<bool> ValidateTokenAsync(int accountId, string token)
     {
-        var confirmationTokens = await confirmations.GetByAccountIdAsync(accountId);
+        var confirmationTokens = await confirmationTokenRepo.GetAllByAccountIdAsync(accountId);
         var tokenHash = HashToken(token);
         var confirmation = confirmationTokens.FirstOrDefault(confirmation =>
             confirmation.TokenHash == tokenHash
@@ -32,7 +32,7 @@ public class ConfirmationTokenService(IConfirmationTokenRepo confirmations) : IC
 
         try
         {
-            await confirmations.ConfirmByIdAsync(confirmation.Id);
+            await confirmationTokenRepo.ConfirmByIdAsync(confirmation.Id, DateTime.UtcNow);
             return true;
         }
         catch
@@ -43,7 +43,7 @@ public class ConfirmationTokenService(IConfirmationTokenRepo confirmations) : IC
 
     public async Task<bool> HasAnyConfirmedTokenAsync(int accountId)
     {
-        var confirmationTokens = await confirmations.GetByAccountIdAsync(accountId);
+        var confirmationTokens = await confirmationTokenRepo.GetAllByAccountIdAsync(accountId);
         return confirmationTokens.Any(confirmation => confirmation.ConfirmedAt != null);
     }
 

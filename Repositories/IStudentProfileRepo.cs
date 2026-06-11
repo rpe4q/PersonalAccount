@@ -2,8 +2,7 @@
 
 namespace PersonalAccount.Repositories;
 
-public interface IStudentProfileRepo
+public interface IStudentProfileRepo : IProfileRepo<StudentProfileModel>
 {
-    Task<StudentProfileModel?> GetByAccountIdAsync(int accountId);
-    Task<List<StudentProfileModel>> GetAllAsync();
+    Task UpdateGroupByAccountIdAsync(int accountId, int groupId);
 }

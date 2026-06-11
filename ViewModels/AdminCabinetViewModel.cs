@@ -1,8 +1,9 @@
 ﻿namespace PersonalAccount.ViewModels;
 
-public class AdminCabinetStudentViewModel
+public class AdminCabinetStudentViewModel : ViewModel
 {
     public int AccountId { get; set; }
+    public int GroupId { get; set; }
     public string Email { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string GroupName { get; set; } = string.Empty;
@@ -10,7 +11,18 @@ public class AdminCabinetStudentViewModel
     public bool IsEmailConfirmed { get; set; }
 }
 
-public class AdminCabinetViewModel
+public class AdminCabinetTeacherViewModel : ViewModel
 {
+    public int AccountId { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string FullName { get; set; } = string.Empty;
+    public string? PhotoUrl { get; set; }
+}
+
+public class AdminCabinetViewModel : ViewModel
+{
+    public List<AdminCabinetTeacherViewModel> Teachers { get; set; } = [];
     public List<AdminCabinetStudentViewModel> Students { get; set; } = [];
+    public List<CabinetGroupViewModel> Groups { get; set; } = [];
+    public List<CabinetDisciplineViewModel> Disciplines { get; set; } = [];
 }

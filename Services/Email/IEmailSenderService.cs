@@ -1,6 +1,6 @@
 ﻿namespace PersonalAccount.Services.Email;
 
-public interface IEmailSender
+public interface IEmailSenderService
 {
     Task SendEmailAsync(string to, string subject, string html);
 }
